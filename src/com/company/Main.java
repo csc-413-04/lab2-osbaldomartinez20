@@ -1,10 +1,33 @@
 package com.company;
 
-class MatrixThreads {
+class MatrixThreads implements Runnable{
+    int a[][];
+    int b[][];
+    int d[][];
+    int start;
+    int stop;
 
+    public MatrixThreads(int[][] _a, int[][] _b, int[][] _d, int _start, int _stop ) {
+        this.a = _a;
+        this.b = _b;
+        this.d = _d;
+        this.start =  _start;
+        this.stop = _stop;
+    }
+    @Override
+    public void run() {
+        int size = a.length;
+        for (int i = start; i < stop; i++) {
+            for (int j = 0; j < size; j++) {
+                for (int k = 0; k < size; k++) {
+                    d[i][j] = d[i][j] + (a[i][k] * b[k][j]);
+                }
+            }
+        }
+    }
 }
 
-public class Main {
+public class Main{
 
     public static int getRand(int min, int max) {
         int x = (int) (Math.random() * ((max - min) + 1)) + min;
@@ -66,7 +89,27 @@ public class Main {
         startTime = System.nanoTime();
         // filler, make either a new class that extends thread, or have this one extend thread
         // figure out how to split work up into at least 2 more threads
-        int d[][] = multiplyParallel(a, b);
+        int d[][] = new int[size][size];
+        MatrixThreads n1 = new MatrixThreads(a,b,d,0, 250);
+        MatrixThreads n2 = new MatrixThreads(a,b,d,250,500);
+        MatrixThreads n3 = new MatrixThreads(a,b,d, 500, 750);
+        MatrixThreads n4 = new MatrixThreads(a,b,d, 750, 1000);
+        Thread t1 = new Thread(n1);
+        Thread t2 = new Thread(n2);
+        Thread t3 = new Thread(n3);
+        Thread t4 = new Thread(n4);
+        t1.start();
+        t2.start();
+        t3.start();
+        t4.start();
+        try {
+            t1.join();
+            t2.join();
+            t3.join();
+            t4.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         endTime = System.nanoTime();
         long parallelTime = endTime - startTime;
         System.out.println("Parallel Time " + parallelTime + " ns");
